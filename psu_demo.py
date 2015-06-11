@@ -102,8 +102,8 @@ def set_pref_val(key, data, domain):
     '''
     if os.geteuid() == 0:
         console_user = get_console_user()
-        cmd = '/usr/bin/python -c \'import CoreFoundation; CoreFoundation.CFPreferencesSetAppValue("%s", "%s")\'' % (
-            key, domain)
+        cmd = '/usr/bin/python -c \'import CoreFoundation; CoreFoundation.CFPreferencesSetAppValue("%s", "%s", "%s")\'' % (
+            key, data, domain)
         subprocess.check_output(['/usr/bin/su',
                                  '%s' % console_user,
                                  '-c',
