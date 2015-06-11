@@ -2,11 +2,12 @@
 
 import os
 import subprocess
-import time
 
 from AppKit import *
 import CoreFoundation
 import Quartz
+
+from pprint import pprint
 
 
 # You need to define these constants for PyObjC < 2.3
@@ -28,15 +29,20 @@ import Quartz
 # NSApplicationPresentationAutoHideToolbar = 1 << 11
 
 
-class colors:
+class Colors:
+    BLUE = '\033[94m'
     BOLD = '\033[1m'
     ENDC = '\033[0m'
     GREEN = '\033[92m'
+    RED = '\033[91m'
 
 
-def print_header(string):
+def print_color(string, color=Colors.GREEN, bold=True):
     if isinstance(string, str):
-        print colors.BOLD + colors.GREEN + string + colors.ENDC
+        if bold:
+            print Colors.BOLD + color + string + Colors.ENDC
+        else:
+            print color + string + Colors.ENDC
 
 
 def block_user():
@@ -110,8 +116,8 @@ def set_pref_val(key, data, domain):
             'PlugInDisallowPromptBeforeUseDialog': False,
             'PlugInFirstVisitPolicy': 'PlugInPolicyAsk',
             'PlugInHostnamePolicies': ({
-                'PlugInHostname': hostname,
-                'PlugInPageURL': uri,
+                'PlugInHostname': <some_hostname>,
+                'PlugInPageURL': <some_uri>,
                 'PlugInPolicy': 'PlugInPolicyAllowNoSecurityRestrictions',
                 'PlugInRunUnsandboxed': True,
             })
@@ -200,29 +206,36 @@ def get_finder_sidebar_item_names():
 
 def main():
     # Check if the computer is locked.
-    print_header('Computer locked:')
+    print_color('Computer locked:')
     print('\t%s' % is_computer_locked())
     print
 
     # Turn on kiosk mode
     block_user()
-    print_header("You're blocked!")
-    time.sleep(2)
+    print_color("You're blocked!")
     print
 
     # Get some preferences.
     keys_to_domains = {
-        'ManagedPlugInPolicies': 'com.apple.safari',
+        'UserStyleSheetEnabled': 'com.apple.safari',
         'menuExtras': 'com.apple.systemuiserver',
         'SendDoNotTrackHTTPHeader': 'com.apple.safari'
     }
-    print_header('Some Preferences:')
+    print_color('Some Preferences:')
     for key, domain in keys_to_domains.items():
         val = get_pref_val(
             key,
             domain
         )
-        print('\t%s (%s): %s' % (key, domain, val))
+        print_color(
+            '\t%s (%s):' % (key, domain),
+            color=Colors.BLUE,
+            bold=False
+        )
+        if not isinstance(val, (int, bool, str, unicode, float, long)):
+            pprint(val)
+        else:
+            print('\t\t%s' % val)
     print
 
     # Set a preference.
@@ -234,7 +247,7 @@ def main():
 
     # Print Finder sidebar items.
     sidebar_items = get_finder_sidebar_item_names()
-    print_header('Finder Sidebar Items:')
+    print_color('Finder Sidebar Items:')
     for item in sidebar_items:
         print('\t' + item)
     print
@@ -244,19 +257,19 @@ def main():
         'askForPassword',
         'com.apple.screensaver'
     )
-    print_header('Managing the screensaver askForPassword preference:')
+    print_color('Managing the screensaver askForPassword preference:')
     print('\t%s' % ask_for_password_managed)
     print
 
     # Show the currently running applications.
     running_apps = get_running_apps()
-    print_header('Running Applications:')
+    print_color('Running Applications:')
     for app in running_apps:
         print('\t' + app)
     print
 
     # Turn off kiosk mode.
-    print_header('Unblocking.')
+    print_color('Unblocking.')
     unblock_user()
 
 
