@@ -28,6 +28,17 @@ import Quartz
 # NSApplicationPresentationAutoHideToolbar = 1 << 11
 
 
+class colors:
+    BOLD = '\033[1m'
+    ENDC = '\033[0m'
+    GREEN = '\033[92m'
+
+
+def print_header(string):
+    if isinstance(string, str):
+        print colors.BOLD + colors.GREEN + string + colors.ENDC
+
+
 def block_user():
     '''
     Kiosk Mode
@@ -53,6 +64,17 @@ def unblock_user():
     options = NSApplicationPresentationDefault
 
     NSApp().setPresentationOptions_(options)
+
+
+def get_running_apps():
+    ws = NSWorkspace.sharedWorkspace()
+    running_apps = ws.runningApplications()
+    apps = []
+    for app in running_apps:
+        apps.append(app.localizedName())
+    apps = set(apps)
+
+    return apps
 
 
 def get_pref_val(key, domain):
@@ -178,13 +200,14 @@ def get_finder_sidebar_item_names():
 
 def main():
     # Check if the computer is locked.
-    print('Computer locked: %s' % is_computer_locked())
+    print_header('Computer locked:')
+    print('\t%s' % is_computer_locked())
     print
 
     # Turn on kiosk mode
     block_user()
-    print("You're blocked!")
-    time.sleep(3)
+    print_header("You're blocked!")
+    time.sleep(2)
     print
 
     # Get some preferences.
@@ -193,7 +216,7 @@ def main():
         'menuExtras': 'com.apple.systemuiserver',
         'SendDoNotTrackHTTPHeader': 'com.apple.safari'
     }
-    print('Some Preferences:')
+    print_header('Some Preferences:')
     for key, domain in keys_to_domains.items():
         val = get_pref_val(
             key,
@@ -211,7 +234,7 @@ def main():
 
     # Print Finder sidebar items.
     sidebar_items = get_finder_sidebar_item_names()
-    print('Finder Sidebar Items:')
+    print_header('Finder Sidebar Items:')
     for item in sidebar_items:
         print('\t' + item)
     print
@@ -219,15 +242,21 @@ def main():
     # Check if the 'askForPassword' preference is managed.
     ask_for_password_managed = CoreFoundation.CFPreferencesAppValueIsForced(
         'askForPassword',
-        'com.apple.screensaver')
-    print(
-        'Managing the screensaver askForPassword preference: %s' %
-        ask_for_password_managed
+        'com.apple.screensaver'
     )
+    print_header('Managing the screensaver askForPassword preference:')
+    print('\t%s' % ask_for_password_managed)
+    print
+
+    # Show the currently running applications.
+    running_apps = get_running_apps()
+    print_header('Running Applications:')
+    for app in running_apps:
+        print('\t' + app)
     print
 
     # Turn off kiosk mode.
-    print('Unblocking.')
+    print_header('Unblocking.')
     unblock_user()
 
 
