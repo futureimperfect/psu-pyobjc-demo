@@ -97,7 +97,7 @@ def get_pref_val(key, domain):
         cmd = '/usr/bin/python -c \'import CoreFoundation; print CoreFoundation.CFPreferencesCopyAppValue("%s", "%s")\'' % (
             key, domain)
         val = subprocess.check_output(['/usr/bin/su',
-                                       '%s' % console_user,
+                                       console_user,
                                        '-c',
                                        cmd])
     else:
@@ -133,7 +133,7 @@ def set_pref_val(key, data, domain):
         cmd = '/usr/bin/python -c \'import CoreFoundation; CoreFoundation.CFPreferencesSetAppValue("%s", "%s", "%s")\'' % (
             key, data, domain)
         subprocess.check_output(['/usr/bin/su',
-                                 '%s' % console_user,
+                                 console_user,
                                  '-c',
                                  cmd])
     else:
@@ -157,7 +157,7 @@ def is_computer_locked():
         console_user = get_console_user()
         cmd = '/usr/bin/python -c \'import Quartz; print Quartz.CGSessionCopyCurrentDictionary()\''
         d = subprocess.check_output(['/usr/bin/su',
-                                     '%s' % console_user,
+                                     console_user,
                                      '-c',
                                      cmd])
         not_on_console = 'kCGSSessionOnConsoleKey = 0'
